@@ -1,21 +1,38 @@
-from discord.ext import commands
+import discord
+import random
+import pickle
 import os
-import traceback
 
-bot = commands.Bot(command_prefix='/')
-token = os.environ['DISCORD_BOT_TOKEN']
+TOKEN = "YOURTOKENHERE"
+path = "Your project path here"
 
+client = discord.Client()
+@client.event
+async def on_ready():
+    print("Botchan Ready to serve")
+text_path = os.path.join(path,"text.sav")
+try:
+    file = open(text_path,"rb")
+    texten = pickle.load(file)
+    file.close
+except:
+    texten = []
+    texten.append("Hello")
 
-@bot.event
-async def on_command_error(ctx, error):
-    orig_error = getattr(error, "original", error)
-    error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
-    await ctx.send(error_msg)
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    randomizer = random.randint(0,len(texten)-1)
+    random2 = random.randint(1,1) #返信を行う頻度を変更可能 ex) ...randint(1,100) 1%の確立で返信
+    if random2 == 1:
+        await message.channel.send(texten[randomizer])
+    if message.content.startswith("Save"):  #誰かがSaveと発言すると蓄積したデータが実際にファイルに保存される。
+        file =open(text_path, "wb")
+        pickle.dump(texten,file)
+        file.close()
+        print("textfile Saved!")
+    else:
+        texten.append(message.content)
 
-
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
-
-
-bot.run(token)
+client.run("ODU1ODI5NDExMTYwMTI5NTU4.YM4LQA.IJJDIoQwAgzUNLZhuZ3OBRjYYMM")
